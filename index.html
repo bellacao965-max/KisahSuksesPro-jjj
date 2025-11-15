@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kisah Sukses Final AI Hebat</title>
+  <meta name="description" content="Kisah Sukses Final AI Hebat - AI mentor bilingual untuk inspirasi harian." />
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b67ff">
+  <link rel="icon" href="/favicon-32.png">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="brand">
+        <img src="logo.png" alt="Kisah Sukses Final AI Hebat" class="logo">
+        <div>
+          <h1 class="title">Kisah Sukses Final AI Hebat</h1>
+          <p class="tag">Your AI success mentor — Mentor AI pribadi untuk inspirasi harian.</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="controls">
+      <form id="searchForm" class="search" onsubmit="return doSearch()">
+        <input id="searchInput" placeholder="Search Google / Cari di Google..." />
+        <button type="submit">Search</button>
+      </form>
+      <div class="youtube-chooser">
+        <label>Video motivasi (random)</label>
+        <button id="newVid">Load Random</button>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="card chat-card" id="chatCard">
+        <div id="messages" class="messages"></div>
+        <form id="chatForm" class="chat-form">
+          <input id="prompt" placeholder="Tanya sesuatu / Ask something..." autocomplete="off">
+          <button type="submit">Kirim / Send</button>
+        </form>
+      </div>
+
+      <div class="card info">
+        <h2>About / Tentang</h2>
+        <p>Campuran Indonesia & English. Chat with the AI for advice, motivation, and summaries of success stories.</p>
+        <div class="video-wrap">
+          <h3>Video Inspirasi</h3>
+          <div id="ytContainer">
+            <iframe id="ytFrame" width="100%" height="215" src="https://www.youtube.com/embed/5qap5aO4i9A" frameborder="0" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>© <span id="year"></span> Kisah Sukses Final AI Hebat — Built with ❤️</p>
+    </footer>
+  </main>
+
+  <script src="ai.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Google search helper
+    function doSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return false;
+      const url = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+      window.open(url, '_blank');
+      return false;
+    }
+
+    // YouTube randomizer (list of motivational video IDs)
+    const vids = ['5qap5aO4i9A','dQw4w9WgXcQ','hLQl3WQQoQ0','s7L2PVdrb_8','2Lz0VOltZKA','K5KAc5CoCuk'];
+    document.getElementById('newVid').addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = vids[Math.floor(Math.random()*vids.length)];
+      document.getElementById('ytFrame').src = 'https://www.youtube.com/embed/' + id;
+    });
+
+    // chat UI handling uses KSPai from ai.js
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('prompt');
+    const messages = document.getElementById('messages');
+    function appendMessage(text, cls='ai') {
+      const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; messages.appendChild(d); messages.scrollTop = messages.scrollHeight;
+    }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const v = input.value.trim(); if (!v) return;
+      appendMessage(v,'user'); appendMessage('...','ai');
+      try {
+        const res = await KSPai.askAI(v, { max_tokens: 300 });
+        const aiBubbles = messages.querySelectorAll('.msg.ai');
+        if (aiBubbles.length) aiBubbles[aiBubbles.length-1].textContent = res;
+      } catch (err) {
+        const aiBubbles = messages.querySelectorAll('.msg.ai');
+        if (aiBubbles.length) aiBubbles[aiBubbles.length-1].textContent = 'Could not reach AI server.';
+      }
+      input.value='';
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('SW registered'));
+    }
+  </script>
+</body>
+</html>
